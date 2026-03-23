@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, CalendarRange, Stethoscope, BriefcaseMedical, Sparkles } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, CalendarRange, Stethoscope, BriefcaseMedical } from 'lucide-react'
 
 export default function Sidebar() {
   const links = [
@@ -13,7 +13,11 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
-        <span className="icon"><Sparkles size={28} color="var(--accent)" /></span>
+        <span className="icon">
+          <div className="tooth-3d">
+            <img src="/tooth-3d.png" alt="Diş" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          </div>
+        </span>
         <h1>Diş Kliniği</h1>
       </div>
       <nav className="sidebar-nav">

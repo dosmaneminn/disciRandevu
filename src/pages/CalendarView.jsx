@@ -5,6 +5,14 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 const DAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']
 const MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
 
+const DOCTOR_COLORS = [
+  { bg: 'rgba(20, 184, 166, 0.15)', border: '#14b8a6', text: '#2dd4bf' }, // Teal
+  { bg: 'rgba(6, 182, 212, 0.15)', border: '#06b6d4', text: '#22d3ee' },  // Cyan
+  { bg: 'rgba(96, 165, 250, 0.15)', border: '#60a5fa', text: '#93c5fd' }, // Blue
+  { bg: 'rgba(167, 139, 250, 0.15)', border: '#a78bfa', text: '#c4b5fd' },// Purple
+  { bg: 'rgba(244, 114, 182, 0.15)', border: '#f472b6', text: '#f9a8d4' },// Pink
+]
+
 export default function CalendarView() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [doctors, setDoctors] = useState([])
@@ -73,6 +81,13 @@ export default function CalendarView() {
     return appointments.filter(a => a.tarih === dateStr)
   }
 
+  function getDoctorColor(doctorId) {
+    const defaultColor = DOCTOR_COLORS[0]
+    if (!doctors.length) return defaultColor
+    const index = doctors.findIndex(d => d.id === doctorId)
+    return index >= 0 ? DOCTOR_COLORS[index % DOCTOR_COLORS.length] : defaultColor
+  }
+
   const today = new Date()
   const isToday = (d) => d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()
 
@@ -89,11 +104,15 @@ export default function CalendarView() {
         <button className={`doctor-tab ${selectedDoctor === 'all' ? 'active' : ''}`} onClick={() => setSelectedDoctor('all')}>
           Tüm Doktorlar
         </button>
-        {doctors.map(d => (
-          <button key={d.id} className={`doctor-tab ${selectedDoctor === d.id ? 'active' : ''}`} onClick={() => setSelectedDoctor(d.id)}>
-            {d.ad_soyad}
-          </button>
-        ))}
+        {doctors.map((d, i) => {
+          const color = DOCTOR_COLORS[i % DOCTOR_COLORS.length]
+          return (
+            <button key={d.id} className={`doctor-tab ${selectedDoctor === d.id ? 'active' : ''}`} onClick={() => setSelectedDoctor(d.id)}>
+               <div style={{ width: 8, height: 8, borderRadius: '50%', background: color.border, display: 'inline-block', marginRight: 6 }}></div>
+              {d.ad_soyad}
+            </button>
+          )
+        })}
       </div>
 
       <div className="card">
@@ -115,11 +134,22 @@ export default function CalendarView() {
               return (
                 <div key={i} className={`calendar-day ${day.otherMonth ? 'other-month' : ''} ${isToday(day.date) ? 'today' : ''}`}>
                   <div className="day-number">{day.date.getDate()}</div>
-                  {events.slice(0, 3).map(e => (
-                    <div key={e.id} className={`calendar-event ${e.hizmet_durumu === 'iptal' ? 'cancelled' : ''}`}>
-                      {e.saat?.slice(0, 5)} {e.hasta_ad_soyad?.split(' ')[0]}
-                    </div>
-                  ))}
+                  {events.slice(0, 3).map(e => {
+                    const color = getDoctorColor(e.doktor_id)
+                    return (
+                      <div 
+                        key={e.id} 
+                        className={`calendar-event ${e.hizmet_durumu === 'iptal' ? 'cancelled' : ''}`}
+                        style={{
+                          background: e.hizmet_durumu !== 'iptal' ? color.bg : undefined,
+                          color: e.hizmet_durumu !== 'iptal' ? color.text : undefined,
+                          borderLeftColor: e.hizmet_durumu !== 'iptal' ? color.border : undefined,
+                        }}
+                      >
+                        {e.saat?.slice(0, 5)} {e.hasta_ad_soyad?.split(' ')[0]}
+                      </div>
+                    )
+                  })}
                   {events.length > 3 && (
                     <div style={{ fontSize: 11, color: 'var(--text-muted)', paddingLeft: 6, marginTop: 4 }}>
                       +{events.length - 3} daha
